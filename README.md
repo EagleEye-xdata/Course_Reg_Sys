@@ -610,8 +610,9 @@ All templates extend `base.html` using Jinja2 template inheritance:
 - `pip`
 
 ### 1. Clone / Download the Project
-```
-c:\Users\spars\OneDrive\Desktop\DBMS\
+```bash
+git clone https://github.com/EagleEye-xdata/Course_Reg_Sys.git
+cd Course_Reg_Sys
 ```
 
 ### 2. Install Python Dependencies
