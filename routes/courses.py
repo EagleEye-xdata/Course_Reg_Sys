@@ -86,6 +86,11 @@ def drop(course_id):
     
     success, message = drop_course(student_id, course_id)
     
+    # Return JSON for AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        from flask import jsonify
+        return jsonify({'success': success, 'message': message}), 200 if success else 400
+    
     if success:
         flash(message, 'success')
     else:

@@ -9,27 +9,28 @@
 ## 📋 Table of Contents
 
 1. [Project Overview](#-project-overview)
-2. [Tech Stack](#-tech-stack)
-3. [Project Structure](#-project-structure)
-4. [Database Design & Normalization](#-database-design--normalization)
+2. [UI/UX Design](#-uiux-design)
+3. [Tech Stack](#-tech-stack)
+4. [Project Structure](#-project-structure)
+5. [Database Design & Normalization](#-database-design--normalization)
    - [What is Normalization?](#what-is-normalization)
    - [1NF — First Normal Form](#1nf--first-normal-form)
    - [2NF — Second Normal Form](#2nf--second-normal-form)
    - [3NF — Third Normal Form](#3nf--third-normal-form)
    - [How This Project Achieves 3NF](#how-this-project-achieves-3nf)
-5. [Database Schema](#-database-schema)
-6. [SQL Features Used](#-sql-features-used)
+6. [Database Schema](#-database-schema)
+7. [SQL Features Used](#-sql-features-used)
    - [Views](#views)
    - [Stored Procedures](#stored-procedures)
    - [Triggers](#triggers)
    - [Indexes](#indexes)
-7. [Backend Architecture](#-backend-architecture)
-8. [Routes & API Endpoints](#-routes--api-endpoints)
-9. [Models Layer](#-models-layer)
-10. [Frontend Templates](#-frontend-templates)
-11. [Business Logic & Rules](#-business-logic--rules)
-12. [Setup & Installation](#-setup--installation)
-13. [How to Run](#-how-to-run)
+8. [Backend Architecture](#-backend-architecture)
+9. [Routes & API Endpoints](#-routes--api-endpoints)
+10. [Models Layer](#-models-layer)
+11. [Frontend Templates](#-frontend-templates)
+12. [Business Logic & Rules](#-business-logic--rules)
+13. [Setup & Installation](#-setup--installation)
+14. [How to Run](#-how-to-run)
 
 ---
 
@@ -44,6 +45,39 @@ This is a **Student Course Registration Web Portal** — a full-stack DBMS proje
 - **Drop elective courses** they no longer want
 
 The project is designed around real-world database concepts — **normalization**, **relational integrity**, **stored procedures**, **triggers**, and **views** — all implemented in MySQL.
+
+---
+
+## 🎨 UI/UX Design
+
+The portal features a **premium, dark-themed glassmorphic design** built from scratch:
+
+### Authentication Pages
+- **Split-screen layout** — Promotional content on the left, frosted-glass login/register form on the right
+- **Dark glassmorphic aesthetic** with backdrop blur, bottom-border-only inputs, and neon-accented buttons
+- **Custom AI-generated background** for an immersive experience
+
+### Dashboard (Landing Page Style)
+- **Hero Banner** with background imagery and call-to-action buttons
+- **Feature Grid** displaying student info (Semester, Student ID, Credits, Join Date) with icon accents
+- **Stats Bar** — Dark glassmorphic card showing Total Courses, Core, Electives at a glance
+- **Course Cards** — Each enrolled course displayed as a visually rich card with AI-generated thumbnails
+
+### Course Catalog & My Courses
+- **Card-based grid layout** replacing traditional data tables
+- **Search & filter bar** with type toggles (All / Core / Elective)
+- **AJAX-powered Drop** — Elective courses can be dropped without page reload, with spinner animation, card fade-out, and success/error toast notifications
+
+### Design System
+| Token | Value | Usage |
+|---|---|---|
+| Background | `#0b0f19` | Page body |
+| Card Surface | `#131b2f` | Cards, panels |
+| Primary Accent | `#3b82f6` | Links, headings |
+| Success/Neon Green | `#20d489` | CTA buttons, gradients |
+| Danger/Neon Pink | `#f43f5e` | Drop buttons, errors |
+| Cyan Accent | `#06b6d4` | Enroll buttons, stats |
+| Font | Inter (Google Fonts) | All UI text |
 
 ---
 
@@ -90,13 +124,19 @@ DBMS/
 │   ├── courses.py              # /courses, /courses/enroll, /courses/drop
 │   └── dashboard.py            # /dashboard
 │
+├── static/                     # Static assets
+│   ├── style.css               # Full custom CSS (dark theme, glassmorphism)
+│   └── img/
+│       ├── auth-bg.png         # Auth pages background image
+│       └── course_thumbnail.png # Course card thumbnail image
+│
 └── templates/                  # Jinja2 HTML templates
     ├── base.html               # Shared layout (navbar, flash messages)
-    ├── login.html              # Login page
-    ├── register.html           # Registration page
-    ├── dashboard.html          # Student portal home
-    ├── courses.html            # Browse available courses
-    └── my_courses.html         # View enrolled courses
+    ├── login.html              # Split-screen glassmorphic login
+    ├── register.html           # Split-screen glassmorphic registration
+    ├── dashboard.html          # Landing page style dashboard
+    ├── courses.html            # Course catalog with card grid
+    └── my_courses.html         # Enrolled courses with AJAX drop
 ```
 
 ---
@@ -570,12 +610,12 @@ is_enrolled(student_id, course_id)
 
 | Template | Purpose |
 |---|---|
-| `base.html` | Shared layout — navbar, flash messages, footer |
-| `login.html` | Login form with email/password |
-| `register.html` | Registration with name, email, semester, department |
-| `dashboard.html` | Rich academic overview: student info, progress bars, course cards |
-| `courses.html` | Course catalog with search, filter by type, enroll buttons |
-| `my_courses.html` | Enrolled courses separated into Core and Elective sections |
+| `base.html` | Shared layout — dark theme navbar, flash messages, footer |
+| `login.html` | Split-screen glassmorphic login with background image |
+| `register.html` | Split-screen glassmorphic registration with neon accents |
+| `dashboard.html` | Landing page style: hero banner, feature grid, stats bar, course cards |
+| `courses.html` | Course catalog with card grid, search bar, and type filters |
+| `my_courses.html` | Enrolled courses as cards with AJAX-powered drop functionality |
 
 All templates extend `base.html` using Jinja2 template inheritance:
 ```html

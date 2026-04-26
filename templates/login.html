@@ -2,31 +2,67 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <h2>Welcome Back</h2>
-        <p class="subtitle">Sign in to your student portal</p>
+<div class="auth-page-wrapper">
+    <!-- Flash Messages Specific to Auth Page -->
+    <div class="auth-flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {% if category == 'success' %}<i class="bi bi-check-circle-fill"></i>
+                    {% elif category == 'danger' %}<i class="bi bi-exclamation-triangle-fill"></i>
+                    {% elif category == 'warning' %}<i class="bi bi-exclamation-circle-fill"></i>
+                    {% else %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 
-        <form method="POST" action="{{ url_for('auth.login') }}" id="login-form">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" name="email" 
-                       placeholder="you@university.edu" required autofocus>
-            </div>
-            <div class="mb-4">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" 
-                       placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn btn-primary-custom" id="login-btn">
-                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-            </button>
-        </form>
+    <!-- Left Side Promotional Content -->
+    <div class="auth-left">
+        <i class="bi bi-mortarboard-fill auth-left-icon"></i>
+        <h1>LOGIN TO YOUR PORTAL</h1>
+        <p>Manage your semester courses efficiently. Access your dashboard to view enrolled courses, drop electives, and stay up to date with your academic progress.</p>
+        <div class="auth-left-actions">
+            <a href="#" class="btn btn-neon-green">Know More</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-neon-pink">Get Started</a>
+        </div>
+    </div>
 
-        <p class="text-center mt-4" style="color: var(--text-secondary); font-size: 0.9rem;">
-            Don't have an account? 
-            <a href="{{ url_for('auth.register') }}" style="font-weight: 600;">Create Account</a>
-        </p>
+    <!-- Right Side Auth Form -->
+    <div class="auth-right">
+        <div class="auth-card">
+            <h2><i class="bi bi-pencil-fill"></i> LOGIN HERE</h2>
+
+            <form method="POST" action="{{ url_for('auth.login') }}" id="login-form">
+                <div class="auth-input-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           placeholder="Email Address" required autofocus>
+                </div>
+                <div class="auth-input-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" 
+                           placeholder="Password" required>
+                </div>
+                
+                <div class="auth-check-group">
+                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">Remember me</label>
+                </div>
+
+                <button type="submit" class="auth-btn-submit" id="login-btn">
+                    Login
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Don't have an account? <a href="{{ url_for('auth.register') }}">Create Account</a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

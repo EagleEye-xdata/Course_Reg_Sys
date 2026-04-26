@@ -2,66 +2,100 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <h2>Create Account</h2>
-        <p class="subtitle">Register as a new student to get started</p>
-
-        <form method="POST" action="{{ url_for('auth.register') }}" id="register-form">
-            <div class="mb-3">
-                <label for="full_name" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="full_name" name="full_name" 
-                       placeholder="Sparsh Kumar" required autofocus>
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" name="email" 
-                       placeholder="sparsh@university.edu" required>
-            </div>
-            <div class="row mb-3">
-                <div class="col-6">
-                    <label for="semester" class="form-label">Semester</label>
-                    <select class="form-select" id="semester" name="semester" required>
-                        <option value="1">Semester 1</option>
-                        <option value="2">Semester 2</option>
-                        <option value="3" selected>Semester 3</option>
-                        <option value="4">Semester 4</option>
-                        <option value="5">Semester 5</option>
-                        <option value="6">Semester 6</option>
-                        <option value="7">Semester 7</option>
-                        <option value="8">Semester 8</option>
-                    </select>
+<div class="auth-page-wrapper">
+    <!-- Flash Messages -->
+    <div class="auth-flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {% if category == 'success' %}<i class="bi bi-check-circle-fill"></i>
+                    {% elif category == 'danger' %}<i class="bi bi-exclamation-triangle-fill"></i>
+                    {% elif category == 'warning' %}<i class="bi bi-exclamation-circle-fill"></i>
+                    {% else %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-                <div class="col-6">
-                    <label for="department" class="form-label">Department</label>
-                    <select class="form-select" id="department" name="department" required>
-                        <option value="CSE" selected>CSE</option>
-                        <option value="ECE">ECE</option>
-                        <option value="MECH">MECH</option>
-                        <option value="CIVIL">CIVIL</option>
-                        <option value="EEE">EEE</option>
-                    </select>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" 
-                       placeholder="Min. 6 characters" required minlength="6">
-            </div>
-            <div class="mb-4">
-                <label for="confirm_password" class="form-label">Confirm Password</label>
-                <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
-                       placeholder="Re-enter password" required>
-            </div>
-            <button type="submit" class="btn btn-primary-custom" id="register-btn">
-                <i class="bi bi-person-plus me-2"></i>Create Account
-            </button>
-        </form>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 
-        <p class="text-center mt-4" style="color: var(--text-secondary); font-size: 0.9rem;">
-            Already have an account? 
-            <a href="{{ url_for('auth.login') }}" style="font-weight: 600;">Sign In</a>
-        </p>
+    <div class="auth-left">
+        <i class="bi bi-mortarboard-fill auth-left-icon"></i>
+        <h1>REGISTER TO OUR COURSE</h1>
+        <p>Join our student course registration system. Register now to auto-enroll in your core semester courses and choose from a rich catalog of electives.</p>
+        <div class="auth-left-actions">
+            <a href="#" class="btn btn-neon-green">Know More</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-neon-pink">Sign In</a>
+        </div>
+    </div>
+
+    <div class="auth-right">
+        <div class="auth-card">
+            <h2><i class="bi bi-pencil-fill"></i> REGISTER HERE</h2>
+
+            <form method="POST" action="{{ url_for('auth.register') }}" id="register-form">
+                <div class="auth-input-group">
+                    <input type="text" class="form-control" id="full_name" name="full_name" 
+                           placeholder="Enter Full Name" required autofocus>
+                </div>
+                <div class="auth-input-group">
+                    <input type="email" class="form-control" id="email" name="email" 
+                           placeholder="Email" required>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="auth-input-group">
+                            <select class="form-select" id="semester" name="semester" required>
+                                <option value="" disabled selected>Semester</option>
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option>
+                                <option value="4">Semester 4</option>
+                                <option value="5">Semester 5</option>
+                                <option value="6">Semester 6</option>
+                                <option value="7">Semester 7</option>
+                                <option value="8">Semester 8</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="auth-input-group">
+                            <select class="form-select" id="department" name="department" required>
+                                <option value="" disabled selected>Department</option>
+                                <option value="CSE">CSE</option>
+                                <option value="ECE">ECE</option>
+                                <option value="MECH">MECH</option>
+                                <option value="CIVIL">CIVIL</option>
+                                <option value="EEE">EEE</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="auth-input-group">
+                    <input type="password" class="form-control" id="password" name="password" 
+                           placeholder="Password" required minlength="6">
+                </div>
+                <div class="auth-input-group">
+                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                           placeholder="Confirm Password" required>
+                </div>
+                
+                <div class="auth-check-group">
+                    <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                    <label class="form-check-label" for="agreeTerms">I agree to the Terms and Conditions</label>
+                </div>
+
+                <button type="submit" class="auth-btn-submit" id="register-btn">
+                    Register
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Already have an account? <a href="{{ url_for('auth.login') }}">Sign In</a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
