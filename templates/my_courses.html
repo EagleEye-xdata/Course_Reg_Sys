@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block title %}My Courses{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Courses</h1>
+    <p class="subtitle">
+        Semester {{ session.get('student_semester', '?') }} — 
+        {{ summary.total_courses or 0 }} courses | {{ summary.total_credits or 0 }} credits
+    </p>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 2rem;">
+    <div class="stat-card blue">
+        <div class="stat-value">{{ summary.total_courses or 0 }}<span style="font-size:0.9rem; color:var(--text-muted);">/7</span></div>
+        <div class="stat-label">Total Courses</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-value">{{ summary.core_count or 0 }}<span style="font-size:0.9rem; color:var(--text-muted);">/5</span></div>
+        <div class="stat-label">Core Courses</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-value">{{ summary.elective_count or 0 }}<span style="font-size:0.9rem; color:var(--text-muted);">/2</span></div>
+        <div class="stat-label">Electives</div>
+    </div>
+</div>
+
+<!-- Core Courses -->
+<h3 class="section-title">
+    <i class="bi bi-bookmark-fill" style="color: var(--accent-blue);"></i>
+    Core Courses
+    <span class="badge badge-core">{{ core_courses|length }} enrolled</span>
+</h3>
+
+{% if core_courses %}
+<div class="table-wrapper">
+    <table class="course-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Course Name</th>
+                <th>Instructor</th>
+                <th>Credits</th>
+                <th>Schedule</th>
+                <th>Enrolled On</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in core_courses %}
+            <tr>
+                <td><span class="course-code">{{ course.course_code }}</span></td>
+                <td class="course-name">{{ course.course_name }}</td>
+                <td class="course-meta">{{ course.instructor }}</td>
+                <td><span class="badge bg-secondary">{{ course.credits }}</span></td>
+                <td class="course-meta">{{ course.schedule or '—' }}</td>
+                <td class="course-meta">{{ course.enrolled_at.strftime('%d %b %Y') if course.enrolled_at else '—' }}</td>
+                <td><span class="badge-enrolled"><i class="bi bi-lock-fill me-1"></i>Mandatory</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-wrapper">
+    <div class="empty-state">
+        <div class="icon">📭</div>
+        <p>No core courses assigned.</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Elective Courses -->
+<h3 class="section-title mt-4">
+    <i class="bi bi-star-fill" style="color: var(--accent-purple);"></i>
+    Elective Courses
+    <span class="badge badge-elective">{{ elective_courses|length }}/2 selected</span>
+</h3>
+
+{% if elective_courses %}
+<div class="table-wrapper">
+    <table class="course-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Course Name</th>
+                <th>Instructor</th>
+                <th>Credits</th>
+                <th>Schedule</th>
+                <th>Enrolled On</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="elective-tbody">
+            {% for course in elective_courses %}
+            <tr>
+                <td><span class="course-code">{{ course.course_code }}</span></td>
+                <td class="course-name">{{ course.course_name }}</td>
+                <td class="course-meta">{{ course.instructor }}</td>
+                <td><span class="badge bg-secondary">{{ course.credits }}</span></td>
+                <td class="course-meta">{{ course.schedule or '—' }}</td>
+                <td class="course-meta">{{ course.enrolled_at.strftime('%d %b %Y') if course.enrolled_at else '—' }}</td>
+                <td>
+                    <button type="button"
+                            class="btn-drop"
+                            id="drop-{{ course.course_id }}"
+                            data-course-id="{{ course.course_id }}"
+                            data-course-name="{{ course.course_name | e }}"
+                            data-drop-url="{{ url_for('courses.drop', course_id=course.course_id) }}">
+                        <i class="bi bi-x-circle me-1"></i>Drop
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-wrapper">
+    <div class="empty-state">
+        <div class="icon">🎯</div>
+        <p>You haven't selected any electives yet. You can pick up to 2 elective courses.
+           <br><a href="{{ url_for('courses.browse_courses', type='elective') }}">Browse electives →</a>
+        </p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<style>
+.btn-drop {
+    position: relative;
+    transition: opacity 0.2s, transform 0.1s;
+}
+.btn-drop:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none !important;
+}
+.btn-drop .spinner-inline {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin-inline 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+@keyframes spin-inline {
+    to { transform: rotate(360deg); }
+}
+.row-dropping {
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+</style>
+<script>
+document.querySelectorAll('.btn-drop').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        /* Block if already processing */
+        if (btn.disabled) return;
+
+        var courseName = btn.getAttribute('data-course-name');
+        var dropUrl   = btn.getAttribute('data-drop-url');
+        var row       = btn.closest('tr');
+
+        if (!confirm('Are you sure you want to drop "' + courseName + '"?\nThis action cannot be undone.')) {
+            return;
+        }
+
+        /* ---- Immediately disable & show spinner ---- */
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-inline"></span>Dropping…';
+
+        /* ---- AJAX POST — no page reload ---- */
+        fetch(dropUrl, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+        .then(function(res) {
+            if (res.ok || res.redirected) {
+                /* Animate row out, then remove it */
+                row.classList.add('row-dropping');
+                setTimeout(function() {
+                    row.remove();
+                    updateElectiveCount();
+                    showToast('Dropped "' + courseName + '" successfully.', 'success');
+                }, 380);
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-x-circle me-1"></i>Drop';
+                showToast('Could not drop course. Please try again.', 'error');
+            }
+        })
+        .catch(function() {
+            /* Network error — fall back to normal form submit */
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-x-circle me-1"></i>Drop';
+            showToast('Network error. Retrying…', 'error');
+        });
+    });
+});
+
+/* ----- Update the elective badge count after drop ----- */
+function updateElectiveCount() {
+    var remaining = document.querySelectorAll('#elective-tbody tr').length;
+    var badge = document.querySelector('.badge-elective');
+    if (badge) badge.textContent = remaining + '/2 selected';
+
+    /* Update stat cards */
+    var electiveStat = document.querySelector('.stat-card.purple .stat-value');
+    if (electiveStat) {
+        electiveStat.innerHTML = remaining + '<span style="font-size:0.9rem;color:var(--text-muted);">/2</span>';
+    }
+    var totalStat = document.querySelector('.stat-card.blue .stat-value');
+    if (totalStat) {
+        var currentTotal = parseInt(totalStat.textContent) - 1;
+        totalStat.innerHTML = currentTotal + '<span style="font-size:0.9rem;color:var(--text-muted);">/7</span>';
+    }
+}
+
+/* ----- Toast notification ----- */
+function showToast(msg, type) {
+    var existing = document.getElementById('drop-toast');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.id = 'drop-toast';
+    toast.style.cssText = [
+        'position:fixed', 'bottom:28px', 'right:28px', 'z-index:9999',
+        'padding:14px 22px', 'border-radius:10px', 'font-size:0.92rem',
+        'font-weight:500', 'box-shadow:0 4px 24px rgba(0,0,0,0.35)',
+        'display:flex', 'align-items:center', 'gap:10px',
+        'animation:toastIn 0.3s ease',
+        type === 'success'
+            ? 'background:#1a3a2a;color:#4ade80;border:1px solid #2d6a4f;'
+            : 'background:#3a1a1a;color:#f87171;border:1px solid #6a2d2d;'
+    ].join(';');
+
+    var icon = type === 'success' ? '✓' : '✕';
+    toast.innerHTML = '<span style="font-size:1.1rem">' + icon + '</span> ' + msg;
+    document.body.appendChild(toast);
+
+    var style = document.createElement('style');
+    style.textContent = '@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}';
+    document.head.appendChild(style);
+
+    setTimeout(function() {
+        toast.style.transition = 'opacity 0.4s';
+        toast.style.opacity = '0';
+        setTimeout(function() { toast.remove(); }, 400);
+    }, 3200);
+}
+</script>
+{% endblock %}

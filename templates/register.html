@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Create Account</h2>
+        <p class="subtitle">Register as a new student to get started</p>
+
+        <form method="POST" action="{{ url_for('auth.register') }}" id="register-form">
+            <div class="mb-3">
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" 
+                       placeholder="Sparsh Kumar" required autofocus>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" 
+                       placeholder="sparsh@university.edu" required>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label for="semester" class="form-label">Semester</label>
+                    <select class="form-select" id="semester" name="semester" required>
+                        <option value="1">Semester 1</option>
+                        <option value="2">Semester 2</option>
+                        <option value="3" selected>Semester 3</option>
+                        <option value="4">Semester 4</option>
+                        <option value="5">Semester 5</option>
+                        <option value="6">Semester 6</option>
+                        <option value="7">Semester 7</option>
+                        <option value="8">Semester 8</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label for="department" class="form-label">Department</label>
+                    <select class="form-select" id="department" name="department" required>
+                        <option value="CSE" selected>CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="MECH">MECH</option>
+                        <option value="CIVIL">CIVIL</option>
+                        <option value="EEE">EEE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" 
+                       placeholder="Min. 6 characters" required minlength="6">
+            </div>
+            <div class="mb-4">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                       placeholder="Re-enter password" required>
+            </div>
+            <button type="submit" class="btn btn-primary-custom" id="register-btn">
+                <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+        </form>
+
+        <p class="text-center mt-4" style="color: var(--text-secondary); font-size: 0.9rem;">
+            Already have an account? 
+            <a href="{{ url_for('auth.login') }}" style="font-weight: 600;">Sign In</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

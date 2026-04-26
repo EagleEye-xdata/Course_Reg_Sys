@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Browse Courses{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Browse Courses</h1>
+    <p class="subtitle">
+        Semester {{ semester }} — 
+        Enrolled: {{ summary.total_courses or 0 }}/7 courses 
+        ({{ (summary.elective_count or 0)|int }}/2 electives)
+    </p>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <form method="GET" action="{{ url_for('courses.browse_courses') }}" class="d-flex gap-2 flex-grow-1 flex-wrap" id="filter-form">
+        <div class="search-input flex-grow-1">
+            <input type="text" class="form-control" name="search" id="search-input"
+                   placeholder="Search by course name or code..." 
+                   value="{{ search_query }}">
+        </div>
+        <button type="submit" class="btn btn-primary-custom" style="width:auto; padding: 0.5rem 1.2rem;">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('courses.browse_courses', type='all') }}" 
+           class="filter-btn {% if filter_type == 'all' %}active{% endif %}">All</a>
+        <a href="{{ url_for('courses.browse_courses', type='core') }}" 
+           class="filter-btn {% if filter_type == 'core' %}active{% endif %}">Core</a>
+        <a href="{{ url_for('courses.browse_courses', type='elective') }}" 
+           class="filter-btn {% if filter_type == 'elective' %}active{% endif %}">Elective</a>
+    </div>
+</div>
+
+<!-- Courses Table -->
+{% if courses %}
+<div class="table-wrapper">
+    <table class="course-table" id="courses-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Course Name</th>
+                <th>Type</th>
+                <th>Instructor</th>
+                <th>Credits</th>
+                <th>Seats</th>
+                <th>Schedule</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr>
+                <td><span class="course-code">{{ course.course_code }}</span></td>
+                <td>
+                    <div class="course-name">{{ course.course_name }}</div>
+                    {% if course.description %}
+                    <div class="course-meta" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {{ course.description }}
+                    </div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if course.course_type == 'core' %}
+                        <span class="badge-core">CORE</span>
+                    {% else %}
+                        <span class="badge-elective">ELECTIVE</span>
+                    {% endif %}
+                </td>
+                <td class="course-meta">{{ course.instructor }}</td>
+                <td><span class="badge bg-secondary">{{ course.credits }}</span></td>
+                <td>
+                    <div class="course-meta">
+                        {{ course.seats_remaining }}/{{ course.max_capacity }}
+                    </div>
+                    <div class="seats-bar">
+                        {% set fill = course.fill_percentage|float %}
+                        <div class="seats-bar-fill {% if fill >= 90 %}low{% elif fill >= 60 %}medium{% else %}high{% endif %}"
+                             style="width: {{ fill }}%"></div>
+                    </div>
+                </td>
+                <td class="course-meta">{{ course.schedule or '—' }}</td>
+                <td>
+                    {% if course.is_enrolled %}
+                        <span class="badge-enrolled"><i class="bi bi-check-circle me-1"></i>Enrolled</span>
+                    {% elif course.course_type == 'core' %}
+                        <span class="course-meta">Auto-enrolled</span>
+                    {% elif course.seats_remaining <= 0 %}
+                        <span class="course-meta" style="color: var(--accent-red);">Full</span>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('courses.enroll', course_id=course.course_id) }}" style="display:inline;">
+                            <button type="submit" class="btn-enroll" id="enroll-{{ course.course_id }}">
+                                <i class="bi bi-plus-circle me-1"></i>Enroll
+                            </button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-wrapper">
+    <div class="empty-state">
+        <div class="icon">🔍</div>
+        <p>No courses found matching your criteria. Try a different search or filter.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

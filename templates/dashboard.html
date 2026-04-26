@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ===== STUDENT PROFILE CARD ===== -->
+<div class="profile-banner">
+    <div class="profile-avatar">
+        {{ student.full_name[0].upper() }}
+    </div>
+    <div class="profile-info">
+        <div class="profile-name">{{ student.full_name }}</div>
+        <div class="profile-sub">
+            <span class="profile-badge dept">🏛️ {{ student.department }}</span>
+            <span class="profile-badge sem">📅 Semester {{ student.semester }}</span>
+            <span class="profile-badge email">✉️ {{ student.email }}</span>
+            <span class="profile-badge join">🗓️ Joined {{ student.created_at.strftime('%d %b %Y') if student.created_at else 'N/A' }}</span>
+        </div>
+    </div>
+    <div class="profile-actions">
+        <a href="{{ url_for('courses.browse_courses') }}" class="btn-action primary">
+            <i class="bi bi-plus-circle"></i> Enroll Courses
+        </a>
+        <a href="{{ url_for('courses.my_courses') }}" class="btn-action secondary">
+            <i class="bi bi-journal-check"></i> My Courses
+        </a>
+    </div>
+</div>
+
+<!-- ===== STATS GRID ===== -->
+<div class="stats-grid">
+    <div class="stat-card blue">
+        <div class="stat-icon">📚</div>
+        <div class="stat-value">{{ summary.total_courses or 0 }}<span style="font-size:1rem; color:var(--text-muted);">/7</span></div>
+        <div class="stat-label">Total Courses</div>
+        <div class="stat-progress">
+            <div class="stat-progress-fill" style="width: {{ ((summary.total_courses or 0) / 7 * 100)|int }}%; background: var(--gradient-primary);"></div>
+        </div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">📗</div>
+        <div class="stat-value">{{ summary.core_count or 0 }}<span style="font-size:1rem; color:var(--text-muted);">/5</span></div>
+        <div class="stat-label">Core Courses</div>
+        <div class="stat-progress">
+            <div class="stat-progress-fill" style="width: {{ ((summary.core_count or 0) / 5 * 100)|int }}%; background: var(--gradient-success);"></div>
+        </div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value">{{ (summary.elective_count or 0)|int }}<span style="font-size:1rem; color:var(--text-muted);">/2</span></div>
+        <div class="stat-label">Electives Chosen</div>
+        <div class="stat-progress">
+            <div class="stat-progress-fill" style="width: {{ ((summary.elective_count or 0) / 2 * 100)|int }}%; background: linear-gradient(135deg, #8b5cf6, #ec4899);"></div>
+        </div>
+    </div>
+    <div class="stat-card amber">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-value">{{ summary.total_credits or 0 }}</div>
+        <div class="stat-label">Total Credits</div>
+        <div class="stat-hint">of semester workload</div>
+    </div>
+</div>
+
+<!-- ===== STUDENT DETAILS PANEL ===== -->
+<div class="details-grid">
+    <div class="detail-panel">
+        <div class="detail-panel-header">
+            <i class="bi bi-person-badge-fill" style="color:var(--accent-blue);"></i>
+            Student Information
+        </div>
+        <div class="detail-rows">
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-person"></i> Full Name</span>
+                <span class="detail-val">{{ student.full_name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-envelope"></i> Email</span>
+                <span class="detail-val">{{ student.email }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-building"></i> Department</span>
+                <span class="detail-val">{{ student.department }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-layers"></i> Semester</span>
+                <span class="detail-val">
+                    <span class="detail-badge blue">Semester {{ student.semester }}</span>
+                    <span class="detail-badge muted">Year {{ ((student.semester - 1) // 2 + 1) }}</span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-calendar-event"></i> Registered On</span>
+                <span class="detail-val">{{ student.created_at.strftime('%A, %d %B %Y at %I:%M %p') if student.created_at else 'N/A' }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-hash"></i> Student ID</span>
+                <span class="detail-val"><code style="color:var(--accent-blue); background:rgba(59,130,246,0.1); padding:2px 8px; border-radius:4px;">#{{ '%04d' % student.student_id }}</code></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-panel">
+        <div class="detail-panel-header">
+            <i class="bi bi-bar-chart-fill" style="color:var(--accent-purple);"></i>
+            Enrollment Status
+        </div>
+        <div class="detail-rows">
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-journal-bookmark"></i> Courses Enrolled</span>
+                <span class="detail-val">
+                    <span class="detail-badge {% if (summary.total_courses or 0) >= 7 %}green{% elif (summary.total_courses or 0) >= 4 %}blue{% else %}amber{% endif %}">
+                        {{ summary.total_courses or 0 }} / 7
+                    </span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-bookmark-fill"></i> Core Courses</span>
+                <span class="detail-val">
+                    <span class="detail-badge blue">{{ summary.core_count or 0 }} / 5</span>
+                    {% if (summary.core_count or 0) < 5 %}
+                    <span class="detail-badge amber">{{ 5 - (summary.core_count or 0) }} pending</span>
+                    {% else %}
+                    <span class="detail-badge green">Complete ✓</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-star-fill"></i> Elective Courses</span>
+                <span class="detail-val">
+                    <span class="detail-badge purple">{{ (summary.elective_count or 0)|int }} / 2</span>
+                    {% if (summary.elective_count or 0) < 2 %}
+                    <span class="detail-badge amber">{{ 2 - (summary.elective_count or 0)|int }} slot{{ 's' if (2 - (summary.elective_count or 0)|int) > 1 }} open</span>
+                    {% else %}
+                    <span class="detail-badge green">All selected ✓</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-award"></i> Total Credits</span>
+                <span class="detail-val"><strong style="color:var(--accent-amber);">{{ summary.total_credits or 0 }}</strong> credits</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key"><i class="bi bi-activity"></i> Enrollment Health</span>
+                <span class="detail-val">
+                    {% set pct = ((summary.total_courses or 0) / 7 * 100)|int %}
+                    {% if pct == 100 %}
+                        <span class="detail-badge green">🟢 Fully Enrolled</span>
+                    {% elif pct >= 70 %}
+                        <span class="detail-badge blue">🔵 Almost Complete</span>
+                    {% elif pct >= 40 %}
+                        <span class="detail-badge amber">🟡 In Progress</span>
+                    {% else %}
+                        <span class="detail-badge red">🔴 Needs Enrollment</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== CORE COURSES TABLE ===== -->
+<h3 class="section-title">
+    <i class="bi bi-bookmark-fill" style="color: var(--accent-blue);"></i>
+    Core Courses
+    <span class="badge badge-core">Auto-Enrolled</span>
+    <span style="margin-left:auto; font-size:0.8rem; font-weight:400; color:var(--text-muted);">{{ core_courses|length }}/5 assigned</span>
+</h3>
+
+{% if core_courses %}
+<div class="table-wrapper">
+    <table class="course-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Code</th>
+                <th>Course Name</th>
+                <th>Instructor</th>
+                <th>Credits</th>
+                <th>Schedule</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in core_courses %}
+            <tr>
+                <td class="course-meta">{{ loop.index }}</td>
+                <td><span class="course-code">{{ course.course_code }}</span></td>
+                <td>
+                    <div class="course-name">{{ course.course_name }}</div>
+                </td>
+                <td class="course-meta">{{ course.instructor }}</td>
+                <td><span class="badge bg-secondary">{{ course.credits }} cr</span></td>
+                <td class="course-meta">{{ course.schedule or '—' }}</td>
+                <td><span class="badge-enrolled"><i class="bi bi-lock-fill me-1"></i>Mandatory</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-wrapper">
+    <div class="empty-state">
+        <div class="icon">📭</div>
+        <p>No core courses assigned yet. Please contact your department.</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- ===== ELECTIVE COURSES TABLE ===== -->
+<h3 class="section-title mt-4">
+    <i class="bi bi-star-fill" style="color: var(--accent-purple);"></i>
+    Elective Courses
+    <span class="badge badge-elective">{{ (summary.elective_count or 0)|int }}/2 selected</span>
+    <a href="{{ url_for('courses.browse_courses', type='elective') }}" 
+       style="margin-left:auto; font-size:0.8rem; font-weight:500; color:var(--accent-blue);">
+       Browse Electives →
+    </a>
+</h3>
+
+{% if elective_courses %}
+<div class="table-wrapper">
+    <table class="course-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Code</th>
+                <th>Course Name</th>
+                <th>Instructor</th>
+                <th>Credits</th>
+                <th>Schedule</th>
+                <th>Enrolled On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in elective_courses %}
+            <tr>
+                <td class="course-meta">{{ loop.index }}</td>
+                <td><span class="course-code">{{ course.course_code }}</span></td>
+                <td class="course-name">{{ course.course_name }}</td>
+                <td class="course-meta">{{ course.instructor }}</td>
+                <td><span class="badge bg-secondary">{{ course.credits }} cr</span></td>
+                <td class="course-meta">{{ course.schedule or '—' }}</td>
+                <td class="course-meta">{{ course.enrolled_at.strftime('%d %b %Y') if course.enrolled_at else '—' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="table-wrapper">
+    <div class="empty-state">
+        <div class="icon">🎯</div>
+        <p>You haven't selected any electives yet. You can pick up to 2.
+           <br><a href="{{ url_for('courses.browse_courses', type='elective') }}">Browse available electives →</a>
+        </p>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
